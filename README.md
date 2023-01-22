@@ -75,7 +75,7 @@ $ pip install jxlpy
 |                     Pillow plugin                     |    Partial    |    High    |          Animation seeking?           |
 |                  Creating animations                  |    Failed     |   Medium   |                   -                   |
 |                  Reading HDR images                   | Needs testing |   Medium   |                   -                   |
-|                  Writing HDR images                   |  Not started  |    Low     |                   -                   |
+|                  Writing HDR images                   | Needs testing |    Low     |                   -                   |
 |       Reading and writing floating point images       |  Not started  |    Low     |                   -                   |
 |                 Support EXIF metadata                 |    Failed     |    High    | It seems like there's no API for that |
 |             Support for other colorspaces             |  Not started  |    Low     |                   -                   |

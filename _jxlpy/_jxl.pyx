@@ -677,7 +677,7 @@ cdef class JXLPyEncoder:
     #                      setting it to fixed number (t) will use only t threads
     #                      it is recommended to keep n <= $threads_of_your_cpu
     def __init__(self, quality: int, size: tuple, effort: int=7, decoding_speed: int=0,
-                 use_container: bool=True, colorspace: str='RGB', endianness: str='native',
+                 use_container: bool=True, colorspace: str='RGB', precision: str='uint8', endianness: str='native',
                  num_threads: int=0):
 
         _check_arg(quality, 'quality', (0, 100))
@@ -714,6 +714,13 @@ cdef class JXLPyEncoder:
         )
         if self.status != JXL_ENC_SUCCESS:
             raise JXLPyError('JxlEncoderSetParallelRunner', self.status)
+
+        if precision == 'uint8':
+            self.basic_info.bits_per_sample = 8
+            self.pixel_format.data_type = JXL_TYPE_UINT8
+        elif precision == 'uint16':
+            self.basic_info.bits_per_sample = 16
+            self.pixel_format.data_type = JXL_TYPE_UINT16
         
         # TODO: allow other colorspaces
         if colorspace == 'RGB':
@@ -723,7 +730,7 @@ cdef class JXLPyEncoder:
         elif colorspace == 'RGBA':
             self.colorspace = JXL_COLOR_SPACE_RGB
             self.basic_info.num_color_channels = 3
-            self.basic_info.alpha_bits = 8
+            self.basic_info.alpha_bits = self.basic_info.bits_per_sample
             samples = 4
         elif colorspace == 'L':
             self.colorspace = JXL_COLOR_SPACE_GRAY
@@ -732,7 +739,7 @@ cdef class JXLPyEncoder:
         elif colorspace == 'LA':
             self.colorspace = JXL_COLOR_SPACE_GRAY
             self.basic_info.num_color_channels = 1
-            self.basic_info.alpha_bits = 8
+            self.basic_info.alpha_bits = self.basic_info.bits_per_sample
             samples = 2
         else:
             raise JxlPyArgumentInvalid('Unknown colorspace.')
@@ -742,11 +749,6 @@ cdef class JXLPyEncoder:
         self.basic_info.num_extra_channels = (
             <uint32_t> samples - self.basic_info.num_color_channels
         )
-        # TODO: support higher bit-depth
-        self.basic_info.bits_per_sample = 8
-        #self.basic_info.have_animation = JXL_TRUE   # animation support doesn't work?
-        #self.basic_info.animation.tps_numerator = 100
-        #self.basic_info.animation.tps_denominator = 1
         
         if lossless:
             self.basic_info.uses_original_profile = JXL_TRUE
@@ -757,7 +759,7 @@ cdef class JXLPyEncoder:
         if self.status != JXL_ENC_SUCCESS:
             raise JXLPyError('JxlEncoderSetBasicInfo', self.status)
         
-        self.pixel_format.data_type = JXL_TYPE_UINT8
+        # self.pixel_format.data_type = JXL_TYPE_UINT8
         self.pixel_format.num_channels = <uint32_t> samples
         
         if endianness == 'little':
